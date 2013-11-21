@@ -1,0 +1,6 @@
+biberltd_unit_converter:
+    pattern:  /{_locale}/unitconverter/convert/{value}/{from}/{to}/{service}
+    defaults: { _controller: BiberLtdBundlesUnitConverterBundle:Default:convert }
+biberltd_unit_converter_formatted:
+    pattern:  /currency/convert_formatted/{value}/{from}/{to}/{service}/{code}/{code_position}/{symbol}/{symbol_position}/{precision}/{round}/{decimal_symbol}/{thousands_symbol}/{show_original}
+    defaults: { _controller: BiberLtdBundlesUnitConverterBundle:Default:convertFormatted, code: "on", code_position: "start", symbol: "off", symbol_position: "start", precision: 2, round: "up", decimal_symbol: ".", thousands_symbol: ",", show_original: "off" }

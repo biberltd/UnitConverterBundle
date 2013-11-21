@@ -1,0 +1,12 @@
+parameters:
+#    biberltd_currency.example.class: BiberLtd\Bundles\UnitConverterBundle\Example
+
+services:
+    biberltd_unit_converter.unit_converter:
+        class:        BiberLtd\Bundles\UnitConverterBundle\Services\UnitConverter
+        arguments:    [@kernel]
+
+    biberltd_unit_converter.routing_loader:
+        class: BiberLtd\Bundles\UnitConverterBundle\Routing\UnitConverterRouteLoader
+        tags:
+          - { name: routing.loader }

@@ -1,0 +1,24 @@
+{
+    "name": "biberltd/currency-bundle",
+    "type": "symfony-bundle",
+    "description": "Handles conversion of numeric values from one currency to another.",
+    "keywords": ["currency exchange", "currency converter", "forex", "e-commerce", "unit converter"],
+    "homepage": "http://github.com/biberltd/UnitConverterBundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Said Imamoglu",
+            "email": "said.imamoglu@biberltd.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.2",
+         "biberltd/exception-bundle": "master"
+    },
+    "autoload": {
+        "psr-0": { "BiberLtd\\Bundles\\UnitConverterBundle": "UnitConverterBundle/" }
+
+    },
+    "minimum-stability": "dev",
+    "target-dir": "BiberLtd/Bundles/UnitConverterBundle/"
+}
