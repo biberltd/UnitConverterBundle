@@ -24,6 +24,7 @@ class UnitConverterDriver {
     protected $code;
     protected $name;
     protected $symbol;
+    protected $kernel;
 
     /** @var integer The allowed length of currency code */
     private $codeLength = 3;
@@ -39,8 +40,10 @@ class UnitConverterDriver {
      * @param 			array 	$config 	Accepted keys: code, name, symbol, codeLength
      *
      */
-    public function __construct(array $config = array()) {
-
+    
+    
+    public function __construct($kernel,array $config = array()) {
+        $this->kernel = $kernel;
         foreach ($config as $key => $value) {
             $setFn = 'set' . ucfirst($key);
             if (method_exists($this, $setFn)) {
@@ -190,7 +193,7 @@ class UnitConverterDriver {
      * @return          array               $this->response
      */
     public function createException($exception, $msg, $code) {
-        $exception = '\BiberLtd\Core\Exceptions\\' . $exception;
+        $exception = 'BiberLtd\\Bundles\\UnitConverterBundle\\Exceptions\\' . $exception;
         new $exception($this->kernel, $msg);
         $this->response['code'] = $code;
         return $this->response;

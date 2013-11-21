@@ -37,7 +37,7 @@ class LoadRouters implements CompilerPassInterface{
             'yaml'
         );
         
-        $definition->addMethodCall('load', $arguments);
+        //$definition->addMethodCall('load', $arguments);
         
     }
 }

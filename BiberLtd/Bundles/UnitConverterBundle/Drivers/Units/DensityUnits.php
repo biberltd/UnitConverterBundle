@@ -11,30 +11,29 @@
  * @copyright   Biber Ltd. (http://www.biberltd.com)
  * @license     GPL v3.0
  *
- * @description Converting Density units.
+ * @description Converting density units.
  *
  */
 
-namespace BiberLtd\Bundles\UnitConverterBundle\Drivers\Currencies;
+namespace BiberLtd\Bundles\UnitConverterBundle\Drivers\Units;
 
-use BiberLtd\Bundles\UnitConverterBundle\Drivers;
+use BiberLtd\Bundles\UnitConverterBundle\Drivers,
+    BiberLtd\Bundles\UnitConverterBundle\Exceptions;
 
 class DensityUnits extends Drivers\UnitConverterDriver {
 
     public $units = array(
-        'g/cm<sup>3</sup>' => 1,
-        'g/l' => 0.001,
-        'g/ml' => 1,
-        'kg/m<sup>3</sup>' => 0.001,
-        'kg/l' => 1,
-        'mg/ml' => 0.001,
-        'mg/l' => 0.000001,
-        'ounce/inch<sup>3</sup>' => 27.679904,
-        'pound/foot<sup>3</sup>' => 0.016018463,
-        'tonne/m<sup>3</sup>' => 140737488355328,
+        'g|cm3;' => 1,
+        'g|l' => 0.001,
+        'glml' => 1,
+        'kg|m3' => 0.001,
+        'kg|l' => 1,
+        'mg|ml' => 0.001,
+        'mg|l' => 0.000001,
+        'ounce|inch3' => 27.679904,
+        'pound|foot3' => 0.016018463,
+        'tonne|m3' => 140737488355328,
     );
-    public $from;
-    public $to;
 
     /**
      * @name        __construct()
@@ -45,8 +44,9 @@ class DensityUnits extends Drivers\UnitConverterDriver {
      * @author          Said Imamoglu
      *
      */
-    public function __construct() {
-        parent::__construct();
+    public function __construct($kernel) {
+
+        parent::__construct($kernel);
     }
 
     /*
@@ -71,7 +71,7 @@ class DensityUnits extends Drivers\UnitConverterDriver {
      * @return      Integer,decimal     $result
      */
 
-    public function convert($value, $from, $to) {
+    public function convert($from, $to, $value) {
         /*
          * Setting elements for calculating
          */
@@ -128,7 +128,7 @@ class DensityUnits extends Drivers\UnitConverterDriver {
      */
 
     public function setFrom($from) {
-        return in_array($from, $this->units) ? $this->units[$from] : $this->createException('UnitValueInvalidException', 'Invalid FROM', 'err.invalid.from');
+        return array_key_exists($from, $this->units) ? $this->units[$from] : $this->createException('UnitValueInvalidException', 'Invalid FROM : ' . $from, 'err.invalid.from');
     }
 
     /*
@@ -150,7 +150,7 @@ class DensityUnits extends Drivers\UnitConverterDriver {
      */
 
     public function setTo($to) {
-        return in_array($to, $this->units) ? $this->units[$to] : $this->createException('UnitValueInvalidException', 'Invalid TO', 'err.invalid.to');
+        return array_key_exists($to, $this->units) ? $this->units[$to] : $this->createException('UnitValueInvalidException', 'Invalid TO : ' . $to, 'err.invalid.to');
     }
 
 }

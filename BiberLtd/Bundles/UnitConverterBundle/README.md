@@ -1,6 +1,6 @@
 UnitConverterBundle
 ==============
 
-Handles conversion of numeric values from one currency to another.
+Handles conversion of numeric values from one unit to another.
 
 Not yet completed..

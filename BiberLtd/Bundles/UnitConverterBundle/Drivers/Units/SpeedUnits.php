@@ -11,34 +11,36 @@
  * @copyright   Biber Ltd. (http://www.biberltd.com)
  * @license     GPL v3.0
  *
- * @description Converting Density units.
+ * @description Converting speed units.
  *
  */
 
-namespace BiberLtd\Bundles\UnitConverterBundle\Drivers\Currencies;
+namespace BiberLtd\Bundles\UnitConverterBundle\Drivers\Units;
 
-use BiberLtd\Bundles\UnitConverterBundle\Drivers;
+use BiberLtd\Bundles\UnitConverterBundle\Drivers,
+    BiberLtd\Bundles\UnitConverterBundle\Exceptions;
 
 class SpeedUnits extends Drivers\UnitConverterDriver {
 
     public $units = array(
-        'bit' => 0.125,
-        'byte' => 1,
-        'kbit' => 128,
-        'kbyte' => 1024,
-        'mbit' => 131072,
-        'mbyte' => 1048576,
-        'gbit' => 134217728,
-        'gbyte' => 1073741824,
-        'tbit' => 137438953472,
-        'tbyte' => 1099511627776,
-        'pbit' => 140737488355328,
-        'pbyte' => 1125899906842624,
-        'ebit' => 144115188075855872,
-        'ebyte' => 1152921504606846976,
+        "cm|min" => 0.00016666666666666666,
+        "cm|sec" => 0.01,
+        "ft|h" => 0.00008466683600033866,
+        "ft|min" => 0.00508,
+        "ft|sec" => 0.3048,
+        "inch|min" => 0.0004233341800016934,
+        "inch|sec" => 0.0254,
+        "km|h" => 0.2777777777777778,
+        'knot' => 0.5144444444444444444,
+        'mach' => 340.2933,
+        "m|h" => 0.0002777777777777778,
+        "m|min" => 0.016666666666666666,
+        "m|s" => 1,
+        "yard|h" => 0.000254000508001016,
+        "yard|min" => 0.01524,
+        "yard|s" => 0.9144,
+        'c' => 2.9979e8
     );
-    public $from;
-    public $to;
 
     /**
      * @name        __construct()
@@ -49,8 +51,9 @@ class SpeedUnits extends Drivers\UnitConverterDriver {
      * @author          Said Imamoglu
      *
      */
-    public function __construct() {
-        parent::__construct();
+    public function __construct($kernel) {
+
+        parent::__construct($kernel);
     }
 
     /*
@@ -75,7 +78,7 @@ class SpeedUnits extends Drivers\UnitConverterDriver {
      * @return      Integer,decimal     $result
      */
 
-    public function convert($value, $from, $to) {
+    public function convert($from, $to, $value) {
         /*
          * Setting elements for calculating
          */
@@ -132,7 +135,7 @@ class SpeedUnits extends Drivers\UnitConverterDriver {
      */
 
     public function setFrom($from) {
-        return in_array($from, $this->units) ? $this->units[$from] : $this->createException('UnitValueInvalidException', 'Invalid FROM', 'err.invalid.from');
+        return array_key_exists($from, $this->units) ? $this->units[$from] : $this->createException('UnitValueInvalidException', 'Invalid FROM : ' . $from, 'err.invalid.from');
     }
 
     /*
@@ -154,7 +157,7 @@ class SpeedUnits extends Drivers\UnitConverterDriver {
      */
 
     public function setTo($to) {
-        return in_array($to, $this->units) ? $this->units[$to] : $this->createException('UnitValueInvalidException', 'Invalid TO', 'err.invalid.to');
+        return array_key_exists($to, $this->units) ? $this->units[$to] : $this->createException('UnitValueInvalidException', 'Invalid TO : ' . $to, 'err.invalid.to');
     }
 
 }

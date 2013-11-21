@@ -11,34 +11,26 @@
  * @copyright   Biber Ltd. (http://www.biberltd.com)
  * @license     GPL v3.0
  *
- * @description Converting Density units.
+ * @description Converting volume units.
  *
  */
 
-namespace BiberLtd\Bundles\UnitConverterBundle\Drivers\Currencies;
+namespace BiberLtd\Bundles\UnitConverterBundle\Drivers\Units;
 
-use BiberLtd\Bundles\UnitConverterBundle\Drivers;
+use BiberLtd\Bundles\UnitConverterBundle\Drivers,
+    BiberLtd\Bundles\UnitConverterBundle\Exceptions;
 
 class VolumeUnits extends Drivers\UnitConverterDriver {
 
     public $units = array(
-        'bit' => 0.125,
-        'byte' => 1,
-        'kbit' => 128,
-        'kbyte' => 1024,
-        'mbit' => 131072,
-        'mbyte' => 1048576,
-        'gbit' => 134217728,
-        'gbyte' => 1073741824,
-        'tbit' => 137438953472,
-        'tbyte' => 1099511627776,
-        'pbit' => 140737488355328,
-        'pbyte' => 1125899906842624,
-        'ebit' => 144115188075855872,
-        'ebyte' => 1152921504606846976,
+        "dm3" => 1,
+        "barrel(s)" => 35.23907016688,
+        "gallon(s)" => 4.54609,
+        'lt' => 1,
+        "pint(s)" => 0.56826125,
+        "tablespoon(s)" => 0.01478676478125,
+        "teaspoon(s)" => 0.00492892159375
     );
-    public $from;
-    public $to;
 
     /**
      * @name        __construct()
@@ -49,8 +41,9 @@ class VolumeUnits extends Drivers\UnitConverterDriver {
      * @author          Said Imamoglu
      *
      */
-    public function __construct() {
-        parent::__construct();
+    public function __construct($kernel) {
+
+        parent::__construct($kernel);
     }
 
     /*
@@ -75,10 +68,9 @@ class VolumeUnits extends Drivers\UnitConverterDriver {
      * @return      Integer,decimal     $result
      */
 
-    public function convert($value, $from, $to) {
-        /*
-         * Setting elements for calculating
-         */
+    public function convert($from, $to, $value) { /*
+     * Setting elements for calculating
+     */
         $value = $this->setValue($value);
         $from = $this->setFrom($from);
         $to = $this->setTo($to);
@@ -132,7 +124,7 @@ class VolumeUnits extends Drivers\UnitConverterDriver {
      */
 
     public function setFrom($from) {
-        return in_array($from, $this->units) ? $this->units[$from] : $this->createException('UnitValueInvalidException', 'Invalid FROM', 'err.invalid.from');
+        return array_key_exists($from, $this->units) ? $this->units[$from] : $this->createException('UnitValueInvalidException', 'Invalid FROM : ' . $from, 'err.invalid.from');
     }
 
     /*
@@ -154,7 +146,7 @@ class VolumeUnits extends Drivers\UnitConverterDriver {
      */
 
     public function setTo($to) {
-        return in_array($to, $this->units) ? $this->units[$to] : $this->createException('UnitValueInvalidException', 'Invalid TO', 'err.invalid.to');
+        return array_key_exists($to, $this->units) ? $this->units[$to] : $this->createException('UnitValueInvalidException', 'Invalid TO : ' . $to, 'err.invalid.to');
     }
 
 }

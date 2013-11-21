@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @name        DigitalStogareUnits
+ * @name        DigitalStorageUnits
  * @package	BiberLtd\UnitConverterBundle
  *
  * @author	Said Imamoglu
@@ -11,15 +11,16 @@
  * @copyright   Biber Ltd. (http://www.biberltd.com)
  * @license     GPL v3.0
  *
- * @description Converting Density units.
+ * @description Converting digital storage units.
  *
  */
 
-namespace BiberLtd\Bundles\UnitConverterBundle\Drivers\Currencies;
+namespace BiberLtd\Bundles\UnitConverterBundle\Drivers\Units;
 
-use BiberLtd\Bundles\UnitConverterBundle\Drivers;
+use BiberLtd\Bundles\UnitConverterBundle\Drivers,
+    BiberLtd\Bundles\UnitConverterBundle\Exceptions;
 
-class DigitalStogareUnits extends Drivers\UnitConverterDriver {
+class DigitalStorageUnits extends Drivers\UnitConverterDriver {
 
     public $units = array(
         'bit' => 0.125,
@@ -37,8 +38,6 @@ class DigitalStogareUnits extends Drivers\UnitConverterDriver {
         'ebit' => 144115188075855872,
         'ebyte' => 1152921504606846976,
     );
-    public $from;
-    public $to;
 
     /**
      * @name        __construct()
@@ -49,8 +48,9 @@ class DigitalStogareUnits extends Drivers\UnitConverterDriver {
      * @author          Said Imamoglu
      *
      */
-    public function __construct() {
-        parent::__construct();
+    public function __construct($kernel) {
+
+        parent::__construct($kernel);
     }
 
     /*
@@ -75,7 +75,7 @@ class DigitalStogareUnits extends Drivers\UnitConverterDriver {
      * @return      Integer,decimal     $result
      */
 
-    public function convert($value, $from, $to) {
+    public function convert($from, $to, $value) {
         /*
          * Setting elements for calculating
          */
@@ -132,7 +132,7 @@ class DigitalStogareUnits extends Drivers\UnitConverterDriver {
      */
 
     public function setFrom($from) {
-        return in_array($from, $this->units) ? $this->units[$from] : $this->createException('UnitValueInvalidException', 'Invalid FROM', 'err.invalid.from');
+        return array_key_exists($from, $this->units) ? $this->units[$from] : $this->createException('UnitValueInvalidException', 'Invalid FROM : ' . $from, 'err.invalid.from');
     }
 
     /*
@@ -154,7 +154,7 @@ class DigitalStogareUnits extends Drivers\UnitConverterDriver {
      */
 
     public function setTo($to) {
-        return in_array($to, $this->units) ? $this->units[$to] : $this->createException('UnitValueInvalidException', 'Invalid TO', 'err.invalid.to');
+        return array_key_exists($to, $this->units) ? $this->units[$to] : $this->createException('UnitValueInvalidException', 'Invalid TO : ' . $to, 'err.invalid.to');
     }
 
 }

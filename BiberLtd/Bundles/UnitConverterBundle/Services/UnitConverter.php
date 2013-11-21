@@ -20,11 +20,11 @@
 
 namespace BiberLtd\Bundles\UnitConverterBundle\Services;
 
-use BiberLtd\Bundles\UnitConverterBundle\Exceptions,
-    BiberLtd\Bundles\UnitConverterBundle\Drivers\Currencies,
-    BiberLtd\Bundles\UnitConverterBundle\Drivers\ServiceProviders;
+use BiberLtd\Bundles\UnitConverterBundle\Exceptions as UnitException,
+    BiberLtd\Bundles\UnitConverterBundle\Drivers\Units;
 
 class UnitConverter {
+    public      $measure;
     /** @var $value value to be converted */
     public      $value;
     /** @var $value_formatted formatted value */
@@ -34,7 +34,7 @@ class UnitConverter {
     /** @var $units collection of currencies */
     protected   $units;
     /** @var $kernel Application kernel */
-    private   $kernel;
+    private     $kernel;
     /**
      * @name 			__construct()
      *  				Constructor function.
@@ -46,7 +46,6 @@ class UnitConverter {
      */
     public function __construct($kernel){
         $this->kernel = $kernel;
-        $this->register_units();
     }
     /**
      * @name 			__destruct()
@@ -79,35 +78,13 @@ class UnitConverter {
      *
      * @return          object          $this
      */
-    public function convert($value, $from = 'm', $to = 'km'){
+    public function convert($measure, $from , $to ,$value){
+        $measure = 'BiberLtd\Bundles\UnitConverterBundle\Drivers\Units\\'.$measure;
+        $unit = new $measure($this->kernel);
         
-        /**
-         * Check if selected conversion service is registered.
-         */
-        if(!isset($value)){
-            new \BiberLtd\Bundles\UnitConverterBundle\Exceptions\UnitValueInvalidException($this->kernel, $value);
-            exit;
-        }
-        $this->value = $value;
+        $result = $unit->convert($from,$to,$value);
         
-        if(!isset($this->units[$from])){
-            new \BiberLtd\Bundles\UnitConverterBundle\Exceptions\UnitValueInvalidException($this->kernel, $from);
-            exit;
-        }
-        $from = $this->units[$from];
-        if(!isset($this->units[$to])){
-            new \BiberLtd\Bundles\UnitConverterBundle\Exceptions\UnitValueInvalidException($this->kernel, $to);
-            exit;
-        }
-        $to = $this->units[$to];
-        
-        $result = $value *($from / $to);
-
-        
-
-        /** Sets the value converted and the value formatted to the converted value. */
-        $this->value_converted = $this->value_formatted = $conversion_rate * $value;
-        return $this;
+        return $result;
     }
     /**
      * @name 			format()
@@ -233,36 +210,6 @@ class UnitConverter {
         return $this;
     }
     /**
-     * @name 			load_xml()
-     *                  Loads the XML file into an object using SimpleXML and cURL libraries.
-     * @author          Can Berkol
-     * @since			1.0.0
-     * @param           string          $url            URL of service
-     * @param           integer         $timeout        Seconds to timeout the connection.
-     * @param           string          $agent          Agent / Browser to behave like.
-     * @return          string          $conversions    Content of XML
-     *
-     */
-    private function load_xml($url, $timeout = 0, $agent = 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1)'){
-        /**
-         * Open remote connection.
-         */
-        $connection = curl_init();
-        curl_setopt($connection, CURLOPT_URL, $url);
-        curl_setopt($connection, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($connection,  CURLOPT_USERAGENT , $agent);
-        curl_setopt($connection, CURLOPT_CONNECTTIMEOUT, $timeout);
-        $xml_string = curl_exec($connection);
-        if(!$xml_string){
-            new \BiberLtd\Bundles\UnitConverterBundle\Exceptions\ConnectionException($this->kernel);
-        }
-        curl_close($connection);
-        /** Remote connection ends */
-        $conversions = new \SimpleXMLElement($xml_string);
-
-        return $conversions;
-    }
-    /**
      *  @name 			output()
      *  				Outputs the converted value.
      *  @author         Can Berkol
@@ -290,45 +237,7 @@ class UnitConverter {
      * @return          object      $this
      *
      */
-    private function register_units(){
-        $files = glob(__DIR__.'\\..\\Drivers\\Units\\*Currency.php');
-        foreach($files as $file){
-            $unit_class = str_replace('.php', '', $file);
-            $unit_class = str_replace(__DIR__.'\\..\\Drivers\\Units\\', '', $unit_class);
-            $unit_code = str_replace('Unit', '', $unit_class);
-            $unit_class = '\\BiberLtd\\Bundles\\UnitConverterBundle\\Drivers\\Units\\'.$unit_class;
-            $unit = new $unit_class();
 
-            $this->units[$unit_code] = $unit;
-        }
-        
-        return $this;
-    }
-    /**
-     * @name 			register_services()
-     *  				Registers all available service provides.
-     *
-     * @since			1.0.0
-     * @version         1.0.0
-     * @author          Can Berkol
-     *
-     * @return          object      $this
-     *
-     */
-    private function register_services(){
-        $files = glob(__DIR__.'\\..\\Drivers\\ServiceProviders\\*Service.php');
-        foreach($files as $file){
-            $service_class = str_replace('.php', '', $file);
-            $service_class = str_replace(__DIR__.'\\..\\Drivers\\ServiceProviders\\', '', $service_class);
-            $service_code = str_replace('Service', '', $service_class);
-            $service_class = '\\BiberLtd\\Bundles\\UnitConverterBundle\\Drivers\\ServiceProviders\\'.$service_class;
-            $service = new $service_class();
-
-            $this->services[$service_code] = $service;
-        }
-
-        return $this;
-    }
 }
 /**
  * Change Log:

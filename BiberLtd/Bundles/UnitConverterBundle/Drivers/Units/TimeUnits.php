@@ -11,31 +11,25 @@
  * @copyright   Biber Ltd. (http://www.biberltd.com)
  * @license     GPL v3.0
  *
- * @description Converting Density units.
+ * @description Converting time units.
  *
  */
 
-namespace BiberLtd\Bundles\UnitConverterBundle\Drivers\Currencies;
+namespace BiberLtd\Bundles\UnitConverterBundle\Drivers\Units;
 
 use BiberLtd\Bundles\UnitConverterBundle\Drivers;
 
 class TimeUnits extends Drivers\UnitConverterDriver {
 
     public $units = array(
-        'bit' => 0.125,
-        'byte' => 1,
-        'kbit' => 128,
-        'kbyte' => 1024,
-        'mbit' => 131072,
-        'mbyte' => 1048576,
-        'gbit' => 134217728,
-        'gbyte' => 1073741824,
-        'tbit' => 137438953472,
-        'tbyte' => 1099511627776,
-        'pbit' => 140737488355328,
-        'pbyte' => 1125899906842624,
-        'ebit' => 144115188075855872,
-        'ebyte' => 1152921504606846976,
+        'y' => 31536000,
+        'w' => 604800,
+        'd' => 86400,
+        'h' => 3600,
+        'min' => 60,
+        'sec' => 1,
+        'msec' => 0.000000001,
+        'nsec' => 0.000000000001,
     );
     public $from;
     public $to;

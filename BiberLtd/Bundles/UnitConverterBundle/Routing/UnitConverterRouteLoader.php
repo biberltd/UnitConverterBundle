@@ -57,7 +57,7 @@ class UnitConverterRouteLoader implements LoaderInterface{
             $route_container->add($name, $route);
         }
 
-        return $route_container;
+        //return $route_container;
     }
 
     public function supports($resource, $type = null){
