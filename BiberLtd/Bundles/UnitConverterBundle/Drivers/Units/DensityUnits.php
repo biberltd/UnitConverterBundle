@@ -23,16 +23,16 @@ use BiberLtd\Bundles\UnitConverterBundle\Drivers,
 class DensityUnits extends Drivers\UnitConverterDriver {
 
     public $units = array(
-        'g|cm3;' => 1,
-        'g|l' => 0.001,
-        'glml' => 1,
-        'kg|m3' => 0.001,
-        'kg|l' => 1,
-        'mg|ml' => 0.001,
-        'mg|l' => 0.000001,
-        'ounce|inch3' => 27.679904,
-        'pound|foot3' => 0.016018463,
-        'tonne|m3' => 140737488355328,
+        "g|cm3" => 1,
+        "g|l" => 0.001,
+        "g|ml" => 1,
+        "kg|m3" => 0.001,
+        "kg|l" => 1,
+        "mg|ml" => 0.001,
+        "mg|l" => 0.000001,
+        "ounce|inch3" => 27.679904,
+        "pound|foot3" => 0.016018463,
+        "tonne|m3" => 140737488355328,
     );
 
     /**
@@ -83,7 +83,6 @@ class DensityUnits extends Drivers\UnitConverterDriver {
          * Converting
          */
         $result = $value * ($from / $to);
-
         return $result;
     }
 

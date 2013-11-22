@@ -1,4 +1,5 @@
 <?php
+
 /**
  * CurrencyConverter Class
  *
@@ -24,17 +25,41 @@ use BiberLtd\Bundles\UnitConverterBundle\Exceptions as UnitException,
     BiberLtd\Bundles\UnitConverterBundle\Drivers\Units;
 
 class UnitConverter {
-    public      $measure;
+
+    public $measure;
+
     /** @var $value value to be converted */
-    public      $value;
+    public $value;
+
     /** @var $value_formatted formatted value */
-    protected   $value_formatted;
+    protected $value_formatted;
+
     /** @var $value_converted converted value */
-    protected   $value_converted;
+    protected $value_converted;
+
     /** @var $units collection of currencies */
-    protected   $units;
+    public $units;
+
     /** @var $kernel Application kernel */
-    private     $kernel;
+    private $kernel;
+
+    /** @var $measures stores which unit drivers installed */
+    protected $measures = array(
+        'density' => 'Density',
+        'digital' => 'DigitalStorage',
+        'electric' => 'ElectricCurrency',
+        'energy' => 'Energy',
+        'force' => 'Force',
+        'length' => 'Length',
+        'power' => 'Power',
+        'pressure' => 'Pressure',
+        'speed' => 'Speed',
+        'temperature' => 'Temperature',
+        'time' => 'Time',
+        'volume' => 'Volume',
+        'weight' => 'Weight',
+    );
+
     /**
      * @name 			__construct()
      *  				Constructor function.
@@ -44,9 +69,12 @@ class UnitConverter {
      * @author          Can Berkol
      *
      */
-    public function __construct($kernel){
+    public function __construct($kernel) {
+        $this->getFiles();
+        die;
         $this->kernel = $kernel;
     }
+
     /**
      * @name 			__destruct()
      *  				Destructor function.
@@ -56,11 +84,12 @@ class UnitConverter {
      * @author          Can Berkol
      *
      */
-    public function __destruct(){
-        foreach($this as $key => $value){
+    public function __destruct() {
+        foreach ($this as $key => $value) {
             $this->$key = null;
         }
     }
+
     /**
      * @name            convert()
      *  				Converts the value from one currency to another using the provided service provider.
@@ -78,14 +107,14 @@ class UnitConverter {
      *
      * @return          object          $this
      */
-    public function convert($measure, $from , $to ,$value){
-        $measure = 'BiberLtd\Bundles\UnitConverterBundle\Drivers\Units\\'.$measure;
+    public function convert($measure, $from, $to, $value) {
+        $measure = 'BiberLtd\Bundles\UnitConverterBundle\Drivers\Units\\' . $measure;
         $unit = new $measure($this->kernel);
-        
-        $result = $unit->convert($from,$to,$value);
-        
+        $result = $unit->convert((string) $from, (string) $to, $value);
+        $this->value_converted = $result;
         return $result;
     }
+
     /**
      * @name 			format()
      *  				Formats number of the value_converted and saves into value_formatted.
@@ -110,28 +139,29 @@ class UnitConverter {
      *
      * @return         object         $this
      */
-    public final function format($unit, array $formatting_options = array()){
-        if(!isset($this->units[$unit['to']])){
-            new \BiberLtd\Bundles\UnitConverterBundle\Exceptions\CurrencyCodeException($this->kernel, $unit['to']);
+    public final function format($type, $from, $to, array $formatting_options = array()) {
+        $type = 'BiberLtd\\Bundles\\UnitConverterBundle\\Drivers\\Units\\' . $type;
+        $unit = new $type($this->kernel);
+
+        if (!isset($unit->units[$to])) {
+            new UnitException\InvalidUnitException($this->kernel, $to);
         }
-        if(!isset($this->units[$unit['from']])){
-            new \BiberLtd\Bundles\UnitConverterBundle\Exceptions\CurrencyCodeException($this->kernel, $unit['from']);
+        if (!isset($unit->units[$from])) {
+            new UnitException\InvalidUnitException($this->kernel, $from);
         }
-        $unit_to = $this->units[$unit['to']];
-        $unit_from = $this->units[$unit['from']];
+        $unit_to = $unit->units[$to];
+        $unit_from = $unit->units[$from];
         /**
          * initialize options
          */
         $default_options = array(
-            'code'              => 'on',
-            'code_position'     => 'end',
-            'symbol'            => 'off',
-            'symbol_position'   => 'start',
-            'precision'         => '2',
-            'round'             => 'up',
-            'decimal_symbol'    => '.',
-            'thousands_symbol'  => ',',
-            'show_original'     => 'off'
+            'code' => 'on',
+            'code_position' => 'end',
+            'precision' => '7', //MAX 40
+            'round' => 'up',
+            'decimal_symbol' => '.',
+            'thousands_symbol' => ',',
+            'show_original' => 'off'
         );
         /**
          * Override defaults.
@@ -144,14 +174,7 @@ class UnitConverter {
         /**
          * Rounding
          */
-        $exploded_value = explode('.', $value);
-        $precision = $options['precision'] + 1;
-        if(!isset($exploded_value[1])){
-            $exploded_value[1] = '00';
-        }
-        $exploded_value[1] = substr($exploded_value[1], 0, $precision);
-        $value = (double) $exploded_value[0].'.'.$exploded_value[1];
-        switch($options['round']){
+        switch ($options['round']) {
             case 'down':
                 $value = round($value, $options['precision'], PHP_ROUND_HALF_DOWN);
                 break;
@@ -160,55 +183,73 @@ class UnitConverter {
                 $value = round($value, $options['precision'], PHP_ROUND_HALF_UP);
                 break;
         }
+
+        /* -------------------------------
+         * Setting precision
+         * -------------------------------
+         * By default php converts numbers to scientific notation (0.00001 to 1.0E-5) which is higher than 10^-4
+         * This is not an issue but i am defining this as an issue :)
+         * 
+         * To fix this issue 
+         * 
+         */
+        if (strpos($value, 'E')) {
+            $explode = explode('E', $value);
+            if ($explode[1] >= 5 || $explode[1] <= -5) {
+                $precision = "%." . $options['precision'] . "f";
+                $value = rtrim(sprintf($precision, $value), '0');
+                // If there are only zeroes after delimiter(.) this will trim all zeroes and dot at the right of value.
+                if (strpos($value, '.')) {
+                    $exploded_value = explode('.', $value);
+
+                    if ($exploded_value[1] == '' || empty($exploded_value[1]) || is_null($exploded_value)) {
+                        $value = $exploded_value[0];
+                    }
+                }
+            }
+        }
+
         /**
          *  Code & Symbol display
          */
-        switch($options['code']){
+        switch ($options['code']) {
+
             case 'off':
                 break;
             case 'on':
+                $to = str_replace('3', '&sup3;', str_replace('2', '&sup2;', str_replace('|', '/', $to)));
+
             default:
-                switch($options['code_position']){
+                switch ($options['code_position']) {
                     case 'start':
-                        $value = $unit_to->getCode().' '.$value;
+                        $value = $to . ' ' . $value;
                         break;
                     case 'end':
                     default:
-                        $value .= ' '.$unit_to->getCode();
+                        $value .= ' ' . $to;
                         break;
                 }
                 break;
         }
-        switch($options['symbol']){
-            case 'off':
-                break;
-            case 'on':
-            default:
-                $symbol = $unit_to->getSymbol();
-                switch($options['symbol_position']){
-                    case 'start':
-                        $value = $symbol.' '.$value;
-                        break;
-                    case 'end':
-                    default:
-                        $value .= ' '.$symbol;
-                        break;
-                }
-                break;
-        }
+
+
         /**
          * Decimal and thousands separator
          */
         $value = str_replace(array('.', ','), array($options['decimal_symbol'], $options['thousands_symbol']), $value);
+
         /**
          * Show original
          */
-        if($options['show_original'] == 'on'){
-            $value .= ' '.'('.$unit_from->getCode().' '.round($this->value, 2).')';
+        if ($options['show_original'] == 'on') {
+            $from = str_replace('3', '&sup3;', str_replace('2', '&sup2;', str_replace('|', '/', $from)));
+            $value .= ' ' . '(' . $from . ' ' . round($this->value, 2) . ')';
         }
         $this->value_formatted = $value;
-        return $this;
+
+        return $value;
     }
+
     /**
      *  @name 			output()
      *  				Outputs the converted value.
@@ -220,25 +261,41 @@ class UnitConverter {
      *  @return         string          $this->value_formatted
      *
      */
-    public final function output($print = false){
-        if(!$print){
+    public final function output($print = false) {
+        if (!$print) {
             return $this->value_formatted;
         }
         echo $this->value_formatted;
     }
-    /**
-     * @name 			register_units()
-     *  				Registers all available currencies.
-     *
-     * @since			1.0.0
-     * @version         1.0.0
-     * @author          Can Berkol
-     *
-     * @return          object      $this
-     *
-     */
+
+    public function checkMeasureExist($type) {
+        if (!is_string($type)) {
+            new UnitException\InvalidUnitException($this->get('kernel'), 'Unit name must be string.');
+            exit;
+        }
+        if (!array_key_exists($type, $this->measures)) {
+            new UnitException\InvalidUnitException($this->get('kernel'), 'Specified unit name can not found : ' . $type);
+            exit;
+        }
+
+        return $this->measures[$type] . 'Units';
+    }
+
+    public function getFiles() {
+        $files = glob(__DIR__ . '/../Drivers/Units/*Units.php');
+        $measureClass = array();
+        foreach ($files as $file) {
+            $class = str_replace(__DIR__ . '/../Drivers/Units/', '', str_replace('.php', '', $file));
+            
+            $measureClass = array(
+                str_replace('units','',strtolower($class)) => $class
+            );
+        }
+
+    }
 
 }
+
 /**
  * Change Log:
  * **************************************

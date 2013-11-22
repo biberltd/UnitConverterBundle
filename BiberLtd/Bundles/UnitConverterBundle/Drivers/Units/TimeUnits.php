@@ -35,7 +35,7 @@ class TimeUnits extends Drivers\UnitConverterDriver {
     public $to;
 
     /**
-     * @name        __construct()
+     * @name        __construct($kernel)
      * Constructor function.
      *
      * @since		1.0.0
@@ -43,8 +43,8 @@ class TimeUnits extends Drivers\UnitConverterDriver {
      * @author          Said Imamoglu
      *
      */
-    public function __construct() {
-        parent::__construct();
+    public function __construct($kernel) {
+        parent::__construct($kernel);
     }
 
     /*
@@ -159,7 +159,7 @@ class TimeUnits extends Drivers\UnitConverterDriver {
  * 20.11.2013
  * v1.0.0                      Said Imamoglu
  * **************************************
- * A __construct()
+ * A __construct($kernel)
  * A convert()
  * A setValue()
  * A setFrom()
