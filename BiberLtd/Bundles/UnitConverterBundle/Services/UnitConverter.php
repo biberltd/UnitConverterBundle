@@ -3,19 +3,17 @@
 /**
  * CurrencyConverter Class
  *
- * This class provides forex (foreign exchange) currency conversion mechanisms.
- *
- * @vendor      BiberLtd
- * @package		Core
- * @subpackage	Services
+ * This class provides unit conversion mechanisms.
+ * 
+ * @package         Core
+ * @subpackage      Services
  * @name	    Encryption
  *
- * @author		Can Berkol
+ * @author          Said İmamoğlu
  *
- * @copyright   Biber Ltd. (www.biberltd.com)
+ * @copyright       Biber Ltd. (www.biberltd.com)
  *
- * @version     1.2.2
- * @date        05.07.2013
+ * @version         1.2.2
  *
  */
 
@@ -44,44 +42,29 @@ class UnitConverter {
     private $kernel;
 
     /** @var $measures stores which unit drivers installed */
-    protected $measures = array(
-        'density' => 'Density',
-        'digital' => 'DigitalStorage',
-        'electric' => 'ElectricCurrency',
-        'energy' => 'Energy',
-        'force' => 'Force',
-        'length' => 'Length',
-        'power' => 'Power',
-        'pressure' => 'Pressure',
-        'speed' => 'Speed',
-        'temperature' => 'Temperature',
-        'time' => 'Time',
-        'volume' => 'Volume',
-        'weight' => 'Weight',
-    );
+    protected $measures = array();
 
     /**
-     * @name 			__construct()
-     *  				Constructor function.
+     * @name 		__construct()
+     *  Constructor function.
      *
-     * @since			1.0.0
+     * @since		1.0.0
      * @version         1.2.2
-     * @author          Can Berkol
+     * @author          Said İmamoğlu
      *
      */
     public function __construct($kernel) {
         $this->getFiles();
-        die;
         $this->kernel = $kernel;
     }
 
     /**
-     * @name 			__destruct()
-     *  				Destructor function.
+     * @name        __destruct()
+     *  Destructor function.
      *
-     * @since			1.0.0
+     * @since		1.0.0
      * @version         1.0.0
-     * @author          Can Berkol
+     * @author          Said İmamoğlu
      *
      */
     public function __destruct() {
@@ -92,45 +75,47 @@ class UnitConverter {
 
     /**
      * @name            convert()
-     *  				Converts the value from one currency to another using the provided service provider.
-     * @author          Can Berkol
-     * @since			1.0.0
+     *Converts the value from one unit to another by the convert method of sub class.
+     * @author          Said İmamoğlu
+     * @since           1.0.0
      * @version         1.2.2
      *
-     * @throws          \BiberLtd\Bundles\UnitConverterBundle\Exceptions\CurrencyServiceProviderException
-     * @throws          \BiberLtd\Bundles\UnitConverterBundle\Exceptions\CurrencyCodeException
+     * @use             $measure->convert()
+     * @throws          UnitException\InvalidUnitException
      *
-     * @param           numeric         $value
+     * @param           string          $measure
      * @param           string          $from
      * @param           string          $to
-     * @param           string          $service
+     * @param           numeric         $value
      *
-     * @return          object          $this
+     * @return          object          $result
      */
     public function convert($measure, $from, $to, $value) {
-        $measure = 'BiberLtd\Bundles\UnitConverterBundle\Drivers\Units\\' . $measure;
-        $unit = new $measure($this->kernel);
-        $result = $unit->convert((string) $from, (string) $to, $value);
+        if (!$this->checkMeasureExist($measure)) {
+            new UnitException\InvalidUnitException($this->get('kernel'), 'Specified unit name can not found : ' . $measure);
+            exit;
+        }
+        $measure = 'BiberLtd\Bundles\UnitConverterBundle\Drivers\Units\\' . $this->measures[$measure];
+        $unitMeasure = new $measure($this->kernel);
+        $result = $unitMeasure->convert((string) $from, (string) $to, $value);
         $this->value_converted = $result;
         return $result;
     }
 
     /**
-     * @name 			format()
-     *  				Formats number of the value_converted and saves into value_formatted.
-     * @author          Can Berkol
-     * @since		    1.0.0
+     * @name 		format()
+     * Formats number of the value_converted and saves into value_formatted.
+     * @author          Said İmamoğlu
+     * @since		1.0.0
      * @version         1.2.2
      *
-     * @throws          \BiberLtd\Bundles\UnitConverterBundle\Exceptions\CurrencyCodeException
+     * @throws          UnitException\InvalidUnitException
      *
      * @param           array          $unit            Keys: from, to
      * @param           array          $formatting_options
      *
      *                                 code             => on, off (show currency code - default: on)
      *                                 code_position    => start, end (default: end)
-     *                                 symbol           => on, off (show currency symbol - default: off)
-     *                                 symbol_position  => start, end (default: start)
      *                                 round            => any integer (default: 2)
      *                                 direction        => up, down (round direction, default: up)
      *                                 decimal_symbol   => any string (default: .)
@@ -139,9 +124,9 @@ class UnitConverter {
      *
      * @return         object         $this
      */
-    public final function format($type, $from, $to, array $formatting_options = array()) {
-        $type = 'BiberLtd\\Bundles\\UnitConverterBundle\\Drivers\\Units\\' . $type;
-        $unit = new $type($this->kernel);
+    public final function format($measure, $from, $to, array $formatting_options = array()) {
+        $measure = 'BiberLtd\\Bundles\\UnitConverterBundle\\Drivers\\Units\\' . $this->measures[$measure];
+        $unit = new $measure($this->kernel);
 
         if (!isset($unit->units[$to])) {
             new UnitException\InvalidUnitException($this->kernel, $to);
@@ -251,47 +236,51 @@ class UnitConverter {
     }
 
     /**
-     *  @name 			output()
-     *  				Outputs the converted value.
-     *  @author         Can Berkol
-     * 	@since			1.0.0
+     * @name 		checkMeasureExist()
+     * Checks if specified measure exist.
+     * @author          Said İmamoğlu
+     * @since		1.0.0
+     * @version         1.2.2
      *
-     *  @param          bool            $print          true|false, false is default. If set to true it does print the value otherwise returns it.
+     * @throws          UnitException\InvalidUnitException
      *
-     *  @return         string          $this->value_formatted
+     * @param           array          $measure            Keys: digitalstorage,density,length
      *
+     * @return         object         $this
      */
-    public final function output($print = false) {
-        if (!$print) {
-            return $this->value_formatted;
-        }
-        echo $this->value_formatted;
-    }
-
-    public function checkMeasureExist($type) {
-        if (!is_string($type)) {
-            new UnitException\InvalidUnitException($this->get('kernel'), 'Unit name must be string.');
-            exit;
-        }
-        if (!array_key_exists($type, $this->measures)) {
-            new UnitException\InvalidUnitException($this->get('kernel'), 'Specified unit name can not found : ' . $type);
+    public function checkMeasureExist($measure) {
+        if (!is_string($measure)) {
+            new UnitException\InvalidUnitException($this->kernel, 'Unit name must be string.');
             exit;
         }
 
-        return $this->measures[$type] . 'Units';
+        if (!array_key_exists($measure, $this->measures)) {
+            new UnitException\InvalidUnitException($this->kernel, 'Specified unit name can not found : ' . $measure);
+            exit;
+        }
+
+        return $this->measures[$measure];
     }
 
+    /**
+     * @name 		getFiles()
+     * Retrieves files from directory to array.
+     * 
+     * @author          Said İmamoğlu
+     * @since		1.0.0
+     * @version         1.2.2
+     *
+     * @return         void
+     */
     public function getFiles() {
+
         $files = glob(__DIR__ . '/../Drivers/Units/*Units.php');
         $measureClass = array();
         foreach ($files as $file) {
             $class = str_replace(__DIR__ . '/../Drivers/Units/', '', str_replace('.php', '', $file));
-            
-            $measureClass = array(
-                str_replace('units','',strtolower($class)) => $class
-            );
+            $measureClass[str_replace('units', '', strtolower($class))] = $class;
         }
-
+        $this->measures = $measureClass;
     }
 
 }
@@ -299,7 +288,7 @@ class UnitConverter {
 /**
  * Change Log:
  * **************************************
- * v1.2.2                      Can Berkol
+ * v1.2.2                      Said İmamoğlu
  * 05.07.2013
  * **************************************
  * ExceptionBundle dependency added.
@@ -309,7 +298,7 @@ class UnitConverter {
  * U format()
  *
  * **************************************
- * v1.0.0                      Can Berkol
+ * v1.0.0                      Said İmamoğlu
  * 21.06.2013
  * **************************************
  * A $code

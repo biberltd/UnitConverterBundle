@@ -7,9 +7,9 @@
  *
  * @package		UnitConverterBundle
  * @subpackage	Controller
- * @name	    DefaultController
+ * @name                DefaultController
  *
- * @author		Can Berkol
+ * @author		Said İmamoğlu
  *
  * @copyright   Biber Ltd. (www.biberltd.com)
  *
@@ -28,9 +28,8 @@ class DefaultController extends Controller {
 
 
     public function convertAction($type, $from, $to, $value) {
-
         $unit_converter = $this->get('biberltd_unit_converter.unit_converter');
-        $converted_value = $unit_converter->convert($measure, $from, $to, $value);
+        $converted_value = $unit_converter->convert($type, $from, $to, $value);
         
         
         $format_options = array(
@@ -43,7 +42,7 @@ class DefaultController extends Controller {
             'show_original' => 'off'
         );
         
-        $formatted_value = $unit_converter->format($measure,$from,$to, $format_options);
+        $formatted_value = $unit_converter->format($type,$from,$to, $format_options);
         
 
         return new Response($formatted_value);
